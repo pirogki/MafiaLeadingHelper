@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Title</title>
+        <link href="css/styles.css" rel="stylesheet">
+		<link href="js/fancybox/jquery.fancybox.css" rel="stylesheet">
+		<link href="js/formstyler/jquery.formstyler.css" rel="stylesheet">
+        <script type="text/javascript" src="js/jquery-3.1.1.min.js"></script>
+		<script type="text/javascript" src="js/fancybox/jquery.fancybox.js"></script>
+		<script type="text/javascript" src="js/formstyler/jquery.formstyler.js"></script>
+        <script type="text/javascript" src="js/mafia.js"></script>
+        <script>
+
+			mafia.players =
+                [
+					{
+						name: "Андрей",
+						id: 1,
+						selected: true
+					},
+					{
+						name: "Саша Краснова",
+						id: 2,
+						selected: true
+					},
+					{
+						name: "Сережа",
+						id: 3,
+						selected: true
+					},
+					{
+						name: "Волынец",
+						id: 4,
+						selected: true
+					},
+					{
+						name: "Маша",
+						id: 5,
+						selected: true
+					},
+					{
+						name: "Таня",
+						id: 6,
+						selected: false
+					},
+					{
+						name: "Яна",
+						id: 7,
+						selected: false
+					},
+					{
+						name: "Валя",
+						id: 8,
+						selected: false
+					},
+					{
+						name: "Рома",
+						id: 9,
+						selected: false
+					},
+					{
+						name: "Даша",
+						id: 10,
+						selected: false
+					},
+						
+                ];
+				
+			$(document).ready( function () {
+				var tableAllPlayers = new Table("allPlayers");
+				var tablePartPlayers = new Table("partPlayers");
+				for(var i in mafia.players) {
+					var player = mafia.players[i];
+					if(!player.selected) {
+						var upButtonHtml = '<span class="right small-button">Вверх</span>';
+						var downButtonHtml = '<span class="right small-button">Вниз</span>';
+						var deleteButtonHtml = '<span class="right small-button">Удалить игрока</span>';
+						tablePartPlayers.addTr([new Td(player.name, 'style="width:50%"'), new Td(upButtonHtml), new Td(downButtonHtml), new Td(deleteButtonHtml)]);
+					}					
+				}
+							
+				$("#add-player").fancybox({
+					href: "#addPlayerForm"
+				});	
+			});
+
+		
+			mafia.drawInfo = function() {};
+        </script>
+    </head>
+    <body>
+        <div id="header" class="panel">
+            <h1>Мафия</h1>
+
+            <ul class="top-menu">
+                <a href><li>Статистика по играм</li></a>
+                <a href><li>Статистика по игрокам</li></a>
+
+            </ul>
+        </div>
+        
+		<div class="players-column panel">
+			<table id="partPlayers" >
+				<tbody>
+					<tr>
+						<th colspan="5">
+							<h2>Участники</h2>
+						</th>
+					</tr>
+				</tbody>
+			</table>
+			<span id="add-player" class="button-black">Добавить игрока</span>
+		</div>
+		
+		<div id="midle-side">
+            <form action="?next-step=true">
+                <input id="selected-players" type="hidden" name="selected-players">
+                <canvas id="players-circle"></canvas>
+            </form>
+        </div>
+		
+		<div style="width:100%;">
+			<span class="button right">Начать игру</span>
+		</div>
+		
+		<div id="addPlayerForm" style="display:none;">
+			<h3>Добавить игрока</h3>
+		</div>
+    </body>
+</html>
+

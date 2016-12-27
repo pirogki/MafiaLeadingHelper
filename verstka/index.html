@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Title</title>
+        <link href="css/styles.css" rel="stylesheet">
+        <script type="text/javascript" src="js/jquery-3.1.1.min.js"></script>
+        <script type="text/javascript" src="js/mafia.js"></script>
+        <script>
+
+			//Настройки страницы
+		
+            /*
+            stateType:
+            1)голосование за убийство
+            2)Голосование выбора кандидатур
+            3)Стадия инициализации ролей
+            4)Стадия действия роли
+            */
+            stateType = 2;
+			mafia.maxNumberOfSelectedPlayers = 2;
+			mafia.selectedLinit = true;
+			
+			
+            if(stateType == 1) {
+                /**
+                 * Перересовывает таблицу с информацией
+                 * Эта функция своя для:
+                 * 1)голосование за убийство
+                 * 2)Голосование выбора кандидатур
+                 * 3)Стадия инициализации ролей
+                 * 4)Стадия действия роли
+                 */
+                mafia.updateDrawCustomInfo = function () {
+                    var table = new Table("vote-info");
+                    table.clear();
+                    table.addTr([new Td("Голосующих:"), new Td(this.getNumberOfVotingPlayers())]);
+                    table.addTr([new Td("Необходимо:"), new Td(this.getNumberOfNeededPlayers())]);
+                    table.addTr([new Td("Проголосовавших:"), new Td(this.getNumberOfVotes())]);
+                    table.addTr([new Td("Хватает:"), this.isEnoughVotesTd()]);
+                }
+            }
+
+            else if(stateType == 2) //Для кандидатур
+            {
+                mafia.updateDrawCustomInfo = function () {
+                    var table = new Table("vote-info");
+                    table.clear();
+                    var players = mafia.sortPlayersByCandidats();
+
+                    for(i in players) {
+                        var player = players[i];
+                        table.addTr([new Td(player.name), new Td(player.numberOfVotes)]);
+                    }
+                    //console.log(players);
+                }
+            }
+
+
+			/**
+			 * Метод, отрабатывающий при выборе игрока
+			 * Могут быть разные варианты:
+			 * 1)Голосование за убийство, стадия инициализации ролей, стадия действия ролей
+			 * 2)Голосование за кандидатов;
+			 * @param e sender
+			 */
+			mafia.playerClick = function (e) {
+
+				
+				var player = mafia.findPlayer($(this).attr("data-id"));
+				var numOfSelPlayers = mafia.getNumberOfVotes();
+					
+				if(!player.selected)
+				{
+					if(!mafia.checkMaxSelPlayers())
+						return;
+				}	
+				$(this).toggleClass("selected");
+				player.selected = !player.selected;
+				// console.log(player);
+				
+				if(stateType == 2)
+				{
+					numOfSelPlayers = mafia.getNumberOfVotes();
+					if(player.selected) {
+						//$(this).addClass("candidature-" + numOfSelPlayers);
+						player.candidate = numOfSelPlayers;
+						$(this).after("<div class='candidate'>" + numOfSelPlayers + "</div>");
+						var $candidateNum = $(this).next();
+						
+						//1) Считаем центр игрока
+						
+						
+						var playerCenter = {
+							x: $(this).offset().left + ($(this).outerWidth() / 2),
+							y: $(this).offset().top + ($(this).outerHeight() / 2)
+						}
+						//2) Исходя из размеров цыфры и центра игрока считаем left и top для цыфры
+						
+						var numberCenter = {
+							x: playerCenter.x - $candidateNum.outerWidth() / 2,
+							y: playerCenter.y - $candidateNum.outerHeight() / 2
+						}
+						
+						$candidateNum.css("left", numberCenter.x);
+						$candidateNum.css("top", numberCenter.y);
+						
+					}
+					else
+					{
+						
+						//Флаг - дошли мы уже до текущего игрока 
+						var displacement = false;
+						
+						//+1 так как нумерация начинается с 1 
+						//+1 так мы уже сняли selected с одного игрока, но не посчитали
+						for(var i = 1; i < numOfSelPlayers + 2; i++) {
+							
+							//Если текущего игрока уже прошли - смещаем.
+							if(displacement)
+							{
+								//Надо:
+								//1) Найти игрока с candidate = i
+								
+								var playerTemp = mafia.findPlayerBySign( function (player) {
+									if(player.candidate == i)
+										return true;
+									else
+										return false;
+								});
+								//2) Найти нужный div по dataId
+								
+								var $playerTemp = $("div[data-id='" + playerTemp.id + "']");
+								
+								//3) Заменить элемент после этого div'a
+								
+								playerTemp.candidate--;
+								
+								$playerTemp.next().html(playerTemp.candidate);
+							
+								//$candidate = $(".candidature-" + i);
+								//$candidate.removeClass("candidature-" + i);
+								//$candidate.addClass("candidature-" + (i-1));
+								//mafia.findPlayer($(this).attr("data-id")).candidate = i - 1;
+								
+								//$(this).next().html($(this).next().html() - 1); 
+							}
+							console.log(mafia.findPlayer($(this).attr("data-id")));
+							if(mafia.findPlayer($(this).attr("data-id")).candidate == i) {
+								displacement = true;
+								//$(this).removeClass("candidature-" + i);
+								$(this).next().remove();
+								//TODO: можно удалять поле candidate
+								mafia.findPlayer($(this).attr("data-id")).candidate = null;
+							}
+						}
+					}
+				}
+				
+				mafia.refreshSelectedPlayers();
+
+				mafia.updateDrawCustomInfo();
+
+			}
+               
+			/**
+			 * Метод, котоорый обновляет скрытое поле для фиксации на сервере выбранных игроков
+			 */
+			mafia.refreshSelectedPlayers = function () {
+				var infoToServer = new Array();
+				for (idx in this.players) {
+					var player = this.players[idx];
+					if(player.selected) {
+						if(typeof player.candidate != "undefinded")
+							infoToServer.push({"id": player.id, "candidate" :player.candidate});
+						else
+							infoToServer.push({"id": player.id});
+					}
+
+				}
+				$("#selected-players").val(JSON.stringify(this.players));
+
+			}
+            
+
+
+
+          
+
+            mafia.players =
+                    [
+                        new mafia.Player(
+                                "Андрей",
+                                1,
+                                false,
+                                true,
+                                "mafia"
+                        ),
+                        new mafia.Player(
+                                "Саша Краснова",
+                                2,
+                                true,
+                                false,
+                                "commissioner"
+                        ),
+                        new mafia.Player(
+                                "Сережа",
+                                3,
+                                false,
+                                false,
+                                "civilians"
+                        ),
+                        new mafia.Player(
+                                "Волынец",
+                                4,
+                                false,
+                                false,
+                                "civilians"
+                        ),
+                        new mafia.Player(
+                                "Маша",
+                                5,
+                                false,
+                                false,
+                                "civilians"
+                        ),
+                        new mafia.Player(
+                                "Таня",
+                                6,
+                                false,
+                                false,
+                                "civilians"
+                        ),
+                        new mafia.Player(
+                                "Яна",
+                                7,
+                                false,
+                                false,
+                                "doctor"
+                        ),
+                        new mafia.Player(
+                                "Валя",
+                                8,
+                                true,
+                                false,
+                                "civilians"
+                        ),
+                        new mafia.Player(
+                                "Рома",
+                                9,
+                                false,
+                                false,
+                                "mistress"
+                        ),
+                        new mafia.Player(
+                                "Даша",
+                                10,
+                                false,
+                                false,
+                                "mafia"
+                        ),
+                    ];
+            //Если кандидатуры, запоняем текущие кандидатуры
+            if(stateType == 2) {
+                mafia.players[0].numberOfVotes = 3;
+                mafia.players[0].lastVoteTime = 3;
+
+                mafia.players[1].numberOfVotes = 0;
+                mafia.players[1].lastVoteTime = 0;
+
+                mafia.players[2].numberOfVotes = 3;
+                mafia.players[2].lastVoteTime = 1;
+
+                mafia.players[3].numberOfVotes = 0;
+                mafia.players[3].lastVoteTime = 0;
+
+                mafia.players[4].numberOfVotes = 0;
+                mafia.players[4].lastVoteTime = 0;
+
+                mafia.players[5].numberOfVotes = 1;
+                mafia.players[5].lastVoteTime = 1;
+
+                mafia.players[6].numberOfVotes = 0;
+                mafia.players[6].lastVoteTime = 0;
+
+                mafia.players[7].numberOfVotes = 0;
+                mafia.players[7].lastVoteTime = 0;
+
+                mafia.players[8].numberOfVotes = 0;
+                mafia.players[8].lastVoteTime = 0;
+
+                mafia.players[9].numberOfVotes = 0;
+                mafia.players[9].lastVoteTime = 0;
+
+            }
+        </script>
+    </head>
+    <body>
+        <div id="header" class="panel">
+            <h1>Мафия</h1>
+            <p class="current-day">Сутки 1, время суток - день</p>
+            <ul class="top-menu">
+                <a href><li>Статистика по играм</li></a>
+                <a href><li>Статистика по игрокам</li></a>
+
+            </ul>
+        </div>
+        <div id="left-side"  class="panel">
+            <div id="phrase" class="text">
+                <h3>Фраза:</h3>
+                <p>Кто за то чтобы убить игрока "Андрей"?</p>
+            </div>
+            <div id="tip"  class="text">
+                <h3>Подсказка для ведущего:</h3>
+                <p>Выбирите игроков, проголосовавших за убийство игрока "Андрей".</p>
+            </div>
+        </div>
+        <div id="midle-side">
+            <form action="?next-step=true">
+                <input id="selected-players" type="hidden" name="selected-players">
+                <canvas id="players-circle"></canvas>
+            </form>
+        </div>
+        <div id="right-side" class="panel right">
+            <div class="text">
+                <table id="mafia-info">
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+        <div class="panel right">
+            <div class="text">
+                <table id="vote-info" >
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+		<div id="footer">
+			<span class="button inherit">Назад</span>
+			
+			<span class="button right">Далее</span>
+			<span class="button right">Спонтанное голосование</span>
+		</div>
+    </body>
+</html>
+
+
+
+<script>
+    $(document).ready(function () {
+        mafia.updateDrawCustomInfo();
+    });
+</script>

@@ -1,0 +1,243 @@
+.panel {
+    border: solid 4px red;
+    background: black;
+    margin: 10px;
+    box-shadow: 10px 10px 3px rgba(100, 0, 0, 1);
+}
+
+#header {
+    border-radius: 40px 40px 0 0;
+    height: 150px;
+    font-size: 20px;
+	margin-bottom: 20px;
+}
+
+#header h1 {
+    color: red;
+    text-align: center;
+    font-size: 40px;
+}
+
+ul.top-menu {
+    text-align: center;
+}
+
+ul.top-menu li {
+    font-size: 20px;
+    display: inline;
+    border: solid 1px red;
+    border-radius: 40px;
+    color: red;
+    padding: 10px;
+}
+
+ul.top-menu a {
+    text-decoration: none;
+}
+
+ul.top-menu li:hover {
+	background: #770000;
+}
+
+#left-side {
+    font-size: 20px;
+    margin: 10px;
+    padding: 10px;
+    background-color: black;
+    border: solid 4px red;
+    border-radius: 0px;
+    width: 40%;
+    height: auto;
+    float: left;
+}
+
+#midle-side {
+    width: 35%;
+    float: left;
+}
+
+.right {
+    float: right;
+
+}
+
+#players-circle {
+    width: auto;
+    height: auto;
+}
+
+.text {
+    background-color: white;
+    margin: 10px;
+    padding: 10px;
+    bgcolor: red;
+    border: solid 4px red;
+    border-radius: 40px;
+    height: auto;
+    float: left;
+    text-align: center;
+}
+
+#tip, #phrase
+{
+    width: 40%;
+}
+
+.current-day {
+    position: absolute;
+    margin: 10px;
+    color: red;
+}
+
+.player {
+    position: absolute;
+    border: solid 2px;
+    padding: 3px;
+    border-radius: 10px;
+    background-color: white;
+}
+
+.player.selectible {
+    cursor: pointer;
+}
+
+.player.dead {
+    background-color: gray;
+}
+
+.player.mistress {
+    border-color: pink;
+}
+
+.player.mistress.selected {
+    background-color: pink;
+}
+
+.player.mafia {
+    border-color: black;
+}
+
+.player.mafia.selected {
+    background-color: black;
+    color: white;
+}
+
+.player.commissioner {
+    border-color: blue;
+}
+
+.player.commissioner.selected {
+    background-color: blue;
+}
+
+.player.doctor {
+    border-color: red;
+}
+
+.player.doctor.selected {
+    background-color: red;
+}
+
+.player.civilians {
+    border-color: green;
+}
+
+.player.civilians.selected {
+    background-color: green;
+}
+
+td.red {
+    background-color: red;
+}
+
+td.green {
+    background-color: green;
+}
+
+.candidate {
+	position: absolute;
+	font-size: 40px;
+	
+	background-color: white;
+    
+    padding: 3px;
+    border: solid 2px red;
+    border-radius: 10px;
+	
+}
+
+#footer {
+	float: left;
+	width: 80%;
+}
+
+
+span.button {
+	font-size: 20px;
+    display: inline;
+    border: solid 1px red;
+    border-radius: 40px;
+    color: black;
+    padding: 10px;
+	cursor: pointer;
+	margin: 10px;
+}
+
+span.button:hover, .button-circle:hover{
+	background-color: red;
+}
+
+.button-circle {
+	border-radius: 100px;
+	width: 20px;
+	height: 20px;
+	display: inline;
+	border: solid 1px red;
+	 border-radius: 40px;
+    color: black;
+    padding: 3px;
+	cursor: pointer;
+	margin: 3px;
+}
+
+.inherit {
+	float: inherit;
+}
+
+.players-column {
+	float: left;
+	width: 50%;
+}
+
+#partPlayers {
+	border-collapse: collapse;	
+	width: 100%;
+}
+ 
+#partPlayers, #partPlayers tr, #partPlayers td {
+	border: 1px solid;
+	color: red;
+	
+}
+
+#partPlayers td {
+	padding: 4px;
+}
+
+.button-black {
+    font-size: 20px;
+    border: solid 1px red;
+    border-radius: 40px;
+    color: red;
+    padding: 10px;
+	text-align: center;
+	display: block;
+	cursor: pointer;
+	margin: 10px;
+}
+
+.button-black:hover {
+	background: #770000;
+	
+}
+
